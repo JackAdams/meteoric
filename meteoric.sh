@@ -40,7 +40,7 @@ if [ -z "$MONGO_URL" ]; then
 	MONGO_URL=mongodb://localhost:27017/$APP_NAME
 fi
 
-if [ -z "METEOR_RELEASE" ]; then
+if [ -z "$METEOR_RELEASE" ]; then
 	METEOR_OPTIONS=""
 else
 	METEOR_OPTIONS="--release $METEOR_RELEASE"
@@ -70,7 +70,10 @@ fi
 
 SETUP="
 sudo apt-get -qq update;
-sudo apt-get install -y git mongodb;
+sudo apt-get install -y git;
+if [ "$SETUP_MONGO" == "true" ]; then
+	sudo apt-get install -y mongodb;
+fi;
 sudo apt-get install -y nodejs npm;
 sudo npm install -g n;
 n $NODE_VERSION;
