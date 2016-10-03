@@ -83,9 +83,9 @@ pwd;
 sudo git clone $GIT_URL $APP_NAME;
 cd $APP_NAME;
 cd $APP_PATH;
-sudo meteor build ../$BUNDLE_NAME.tgz $METEOR_OPTIONS;
+sudo meteor build ../$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
 cd ..;
-sudo tar -zxvf $BUNDLE_NAME.tgz/$BUNDLE_NAME.tar.gz;
+sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$APP_NAME.tar.gz;
 cd $BUNDLE_DIRECTORY_NAME/programs/server;
 sudo npm install;
 "
@@ -118,7 +118,7 @@ sudo meteor build ../$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
 
 cd ..;
 echo Unpacking ...;
-sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$BUNDLE_DIRECTORY_NAME.tar.gz;
+sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$APP_NAME.tar.gz;
 
 if [ "$FORCE_CLEAN" == "true" ]; then
 	cd $BUNDLE_DIRECTORY_NAME/programs/server;
