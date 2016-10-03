@@ -114,11 +114,11 @@ if [ "$FORCE_CLEAN" == "true" ]; then
     sudo rm -rf ../$BUNDLE_DIRECTORY_NAME.tgz > /dev/null 2>&1;
 fi;
 echo Creating new bundle. This may take a few minutes;
-sudo meteor build ../$BUNDLE_NAME.tgz $METEOR_OPTIONS;
+sudo meteor build ../$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
 
 cd ..;
 echo Unpacking ...;
-sudo tar -zxvf $BUNDLE_NAME.tgz/$BUNDLE_NAME.tar.gz;
+sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$BUNDLE_DIRECTORY_NAME.tar.gz;
 
 if [ "$FORCE_CLEAN" == "true" ]; then
 	cd $BUNDLE_DIRECTORY_NAME/programs/server;
