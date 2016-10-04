@@ -52,10 +52,20 @@ else
 	SSH_HOST="ubuntu@$APP_HOST" SSH_OPT="-i $EC2_PEM_FILE"
 fi
 
-if [ -z "$BUNDLE_NAME" ]; then
+if [ -z "$REPO_NAME" ]; then
+    EXTRACTION_TARGET=./
+	LOG_TARGET=''
 	BUNDLE_DIRECTORY_NAME=bundle
+	REPO_NAME=$APP_NAME
+	APP_REPO_NAME=$APP_NAME
 else
-	BUNDLE_DIRECTORY_NAME=$BUNDLE_NAME
+	EXTRACTION_TARGET=$APP_NAME
+	LOG_TARGET=$APP_NAME/
+	BUNDLE_DIRECTORY_NAME=$APP_NAME/bundle
+	if [ -z "$APP_REPO_NAME" ]; then
+		echo 'APP_REPO_NAME must be set when REPO_NAME is set';
+		exit 1;
+	fi;
 fi
 
 if [ -z "$ENVIRONMENT_VARIABLES" ]; then
@@ -83,12 +93,13 @@ curl https://install.meteor.com | /bin/sh;
 sudo mkdir -p $APP_DIR;
 cd $APP_DIR;
 pwd;
-sudo git clone $GIT_URL $APP_NAME;
-cd $APP_NAME;
+sudo git clone $GIT_URL $REPO_NAME;
+cd $REPO_NAME;
 cd $APP_PATH;
-sudo meteor build ../$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
-cd ..;
-sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$APP_NAME.tar.gz;
+sudo meteor build $APP_DIR/$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
+cd $APP_DIR;
+sudo mkdir -p $BUNDLE_DIRECTORY_NAME;
+sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$APP_REPO_NAME.tar.gz -C $EXTRACTION_TARGET;
 cd $BUNDLE_DIRECTORY_NAME/programs/server;
 sudo npm install;
 "
@@ -103,7 +114,7 @@ fi
 
 DEPLOY="
 cd $APP_DIR;
-cd $APP_NAME;
+cd $REPO_NAME;
 echo Updating codebase;
 sudo git fetch origin;
 sudo git checkout $GIT_BRANCH;
@@ -117,25 +128,25 @@ if [ "$FORCE_CLEAN" == "true" ]; then
     sudo rm -rf ../$BUNDLE_DIRECTORY_NAME.tgz > /dev/null 2>&1;
 fi;
 echo Creating new bundle. This may take a few minutes;
-sudo meteor build ../$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
+sudo meteor build $APP_DIR/$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
 
-cd ..;
+cd $APP_DIR;
 echo Unpacking ...;
-sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$APP_NAME.tar.gz;
+sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$APP_REPO_NAME.tar.gz -C $EXTRACTION_TARGET;
 
 if [ "$FORCE_CLEAN" == "true" ]; then
 	cd $BUNDLE_DIRECTORY_NAME/programs/server;
 	sudo npm install;
-	cd ../../..;
+	cd $APP_DIR;
 fi;
 
 echo Stopping forever;
-sudo forever stopall;
+sudo forever stop $BUNDLE_DIRECTORY_NAME/main.js;
 echo Starting forever;
 
 for ((CURRENT_PORT=$MIN_PORT; CURRENT_PORT<=$MAX_PORT; CURRENT_PORT++));
 do
-COMMAND='sudo PORT='\$CURRENT_PORT' ROOT_URL=$ROOT_URL MONGO_URL=$MONGO_URL $ENVIRONMENT forever start -o stdout.log -e stderr.log $BUNDLE_DIRECTORY_NAME/main.js';
+COMMAND='sudo PORT='\$CURRENT_PORT' ROOT_URL=$ROOT_URL MONGO_URL=$MONGO_URL $ENVIRONMENT forever start -o '$LOG_TARGET'stdout.log -e '$LOG_TARGET'stderr.log $BUNDLE_DIRECTORY_NAME/main.js';
 echo \$COMMAND;
 eval "\$COMMAND";
 done
