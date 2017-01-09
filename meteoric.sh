@@ -128,7 +128,7 @@ if [ "$FORCE_CLEAN" == "true" ]; then
     sudo rm -rf ../$BUNDLE_DIRECTORY_NAME.tgz > /dev/null 2>&1;
 fi;
 echo Creating new bundle. This may take a few minutes;
-sudo meteor build $APP_DIR/$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS;
+sudo meteor build $APP_DIR/$BUNDLE_DIRECTORY_NAME.tgz $METEOR_OPTIONS --unsafe-perm;
 
 cd $APP_DIR;
 echo Unpacking ...;
