@@ -78,6 +78,10 @@ if [ -z "$NODE_VERSION" ]; then
 	NODE_VERSION='4.5.0';
 fi
 
+if [ -z "$APP_PATH" ]; then
+	APP_PATH="."
+fi
+
 SETUP="
 sudo apt-get -qq update;
 sudo apt-get install -y git;
@@ -103,10 +107,6 @@ sudo tar -zxvf $BUNDLE_DIRECTORY_NAME.tgz/$APP_REPO_NAME.tar.gz -C $EXTRACTION_T
 cd $BUNDLE_DIRECTORY_NAME/programs/server;
 sudo npm install;
 "
-
-if [ -z "$APP_PATH" ]; then
-	APP_PATH="."
-fi
 
 if [ -z "$GIT_BRANCH" ]; then
 	GIT_BRANCH="master"

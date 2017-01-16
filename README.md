@@ -72,6 +72,11 @@ $ meteoric setup
 $ meteoric deploy
 ```
 
+To start/restart instance(s):
+```bash
+meteoric start
+```
+
 If you'd like to use a different location for meteoric.config.sh, supply it as a second parameter:
 
 ```bash
