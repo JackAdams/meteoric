@@ -112,6 +112,22 @@ if [ -z "$GIT_BRANCH" ]; then
 	GIT_BRANCH="master"
 fi
 
+START="
+cd $APP_DIR;
+echo Stopping forever;
+sudo forever stop $BUNDLE_DIRECTORY_NAME/main.js;
+echo Starting forever;
+
+for ((CURRENT_PORT=$MIN_PORT; CURRENT_PORT<=$MAX_PORT; CURRENT_PORT++));
+do
+COMMAND='sudo PORT='\$CURRENT_PORT' ROOT_URL=$ROOT_URL MONGO_URL=$MONGO_URL $ENVIRONMENT forever start -o '$LOG_TARGET'stdout.log -e '$LOG_TARGET'stderr.log $BUNDLE_DIRECTORY_NAME/main.js';
+echo \$COMMAND;
+eval "\$COMMAND";
+done
+	
+# sudo -E forever start $BUNDLE_DIRECTORY_NAME/main.js;
+"
+
 DEPLOY="
 cd $APP_DIR;
 cd $REPO_NAME;
@@ -139,20 +155,9 @@ if [ "$FORCE_CLEAN" == "true" ]; then
 	sudo npm install;
 	cd $APP_DIR;
 fi;
-
-echo Stopping forever;
-sudo forever stop $BUNDLE_DIRECTORY_NAME/main.js;
-echo Starting forever;
-
-for ((CURRENT_PORT=$MIN_PORT; CURRENT_PORT<=$MAX_PORT; CURRENT_PORT++));
-do
-COMMAND='sudo PORT='\$CURRENT_PORT' ROOT_URL=$ROOT_URL MONGO_URL=$MONGO_URL $ENVIRONMENT forever start -o '$LOG_TARGET'stdout.log -e '$LOG_TARGET'stderr.log $BUNDLE_DIRECTORY_NAME/main.js';
-echo \$COMMAND;
-eval "\$COMMAND";
-done
-	
-# sudo -E forever start $BUNDLE_DIRECTORY_NAME/main.js;
 "
+
+DEPLOY+=$START
 
 case "$1" in
 setup)
@@ -160,6 +165,9 @@ setup)
 	;;
 deploy)
 	ssh $SSH_OPT $SSH_HOST $DEPLOY
+	;;
+start)
+	ssh $SSH_OPT $SSH_HOST $START
 	;;
 *)
 	cat <<ENDCAT
